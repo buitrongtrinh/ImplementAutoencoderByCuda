@@ -52,7 +52,7 @@ int main() {
     }
 
     CIFAR10Dataset dataset;
-    dataset.loadData("cifar-10-batches-bin");
+    dataset.loadData("../cifar-10-batches-bin");
 
     log << "========== GPU AUTOENCODER TRAINING ==========\n";
     log << "Batch size = " << BATCH_SIZE << "\n";
