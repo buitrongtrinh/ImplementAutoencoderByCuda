@@ -1,0 +1,36 @@
+========== Epoch 1/4 ==========
+Average Loss: 0.101046
+Epoch Time:  405.909 seconds
+Average Batch Time: 396.386 ms
+Throughput: 5.04546 images/second
+Batch Size: 2
+Num Batches: 1024
+==========================================
+
+========== Epoch 2/4 ==========
+Average Loss: 0.041278
+Epoch Time:  406.75 seconds
+Average Batch Time: 397.204 ms
+Throughput: 5.03504 images/second
+Batch Size: 2
+Num Batches: 1024
+==========================================
+
+========== Epoch 3/4 ==========
+Average Loss: 0.0410776
+Epoch Time:  407.197 seconds
+Average Batch Time: 397.639 ms
+Throughput: 5.02951 images/second
+Batch Size: 2
+Num Batches: 1024
+==========================================
+
+========== Epoch 4/4 ==========
+Average Loss: 0.0401087
+Epoch Time:  406.238 seconds
+Average Batch Time: 396.705 ms
+Throughput: 5.04138 images/second
+Batch Size: 2
+Num Batches: 1024
+==========================================
+
