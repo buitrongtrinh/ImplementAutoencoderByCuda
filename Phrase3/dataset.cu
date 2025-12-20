@@ -88,11 +88,11 @@ float* CIFAR10Dataset::getBatch(int start_idx, int batch_size, bool is_train) {
 
 
 int CIFAR10Dataset::getNumTrainBatches(int batch_size) const {
-    return (train_labels.size() + batch_size - 1) / batch_size;
+    return train_labels.size() / batch_size;
 }
 
 int CIFAR10Dataset::getNumTestBatches(int batch_size) const {
-    return (test_labels.size() + batch_size - 1) / batch_size;
+    return test_labels.size() / batch_size;
 }
 
 int CIFAR10Dataset::getSizeTrain() const{
