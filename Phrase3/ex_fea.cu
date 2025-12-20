@@ -11,7 +11,7 @@ int main() {
     std::cout << "========== FEATURE EXTRACTION ==========\n";
 
     CIFAR10Dataset dataset;
-    dataset.loadData("cifar-10-batches-bin");
+    dataset.loadData("../cifar-10-batches-bin");
 
     GPUAutoencoder model(BATCH_SIZE, 0.0f);
     model.loadWeights("autoencoder_gpu.weights");
