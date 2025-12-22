@@ -44,18 +44,21 @@ void GPUAutoencoder::allocateHostMemory() {
 // ================= WEIGHT INITIALIZATION =================
 void GPUAutoencoder::initializeWeights() {
     std::mt19937 gen(42);
-    std::normal_distribution<float> dist(0.0f, 0.02f);
 
-    auto init_w = [&](float* w, int n) {
-        for (int i = 0; i < n; i++)
+    auto he_init = [&](float* w, int kh, int kw, int cin, int cout) {
+        int fan_in = kh * kw * cin;
+        float std = sqrtf(2.0f / fan_in);
+        std::normal_distribution<float> dist(0.0f, std);
+
+        for (int i = 0; i < kh * kw * cin * cout; i++)
             w[i] = dist(gen);
     };
 
-    init_w(h_w1, 3*3*3*256);
-    init_w(h_w2, 3*3*256*128);
-    init_w(h_w3, 3*3*128*128);
-    init_w(h_w4, 3*3*128*256);
-    init_w(h_w5, 3*3*256*3);
+    he_init(h_w1, 3, 3, 3,   256);
+    he_init(h_w2, 3, 3, 256, 128);
+    he_init(h_w3, 3, 3, 128, 128);
+    he_init(h_w4, 3, 3, 128, 256);
+    he_init(h_w5, 3, 3, 256, 3);
 
     std::fill(h_b1, h_b1 + 256, 0.0f);
     std::fill(h_b2, h_b2 + 128, 0.0f);
@@ -105,7 +108,7 @@ void GPUAutoencoder::allocateDeviceMemory() {
     CUDA_CHECK(cudaMalloc(&d_db4, 256*sizeof(float)));
     CUDA_CHECK(cudaMalloc(&d_db5, 3*sizeof(float)));
 
-    // ✅ THÊM: Allocate pre-activation buffers
+    // Allocate pre-activation buffers
     CUDA_CHECK(cudaMalloc(&d_o1_pre, batch_size*32*32*256*sizeof(float)));
     CUDA_CHECK(cudaMalloc(&d_o3_pre, batch_size*16*16*128*sizeof(float)));
     CUDA_CHECK(cudaMalloc(&d_o5_pre, batch_size*8*8*128*sizeof(float)));
@@ -149,7 +152,7 @@ GPUAutoencoder::~GPUAutoencoder() {
     cudaFree(d_dw4); cudaFree(d_dw5);
     cudaFree(d_db1); cudaFree(d_db2); cudaFree(d_db3);
     cudaFree(d_db4); cudaFree(d_db5);
-    // ✅ THÊM: Free pre-activation buffers
+    // Free pre-activation buffers
     cudaFree(d_o1_pre);
     cudaFree(d_o3_pre);
     cudaFree(d_o5_pre);

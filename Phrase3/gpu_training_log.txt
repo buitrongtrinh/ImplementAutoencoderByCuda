@@ -1,212 +1,212 @@
 ========== GPU AUTOENCODER TRAINING ==========
 Batch size = 64
 Epochs     = 20
-LR         = 0.0005
+LR         = 0.009
 
 [GPU MEM][Before Model Init] 102.938 / 15095.1 MB
-[GPU MEM][After Model Init] 290.938 / 15095.1 MB
+[GPU MEM][After Model Init] 380.938 / 15095.1 MB
 [Epoch 0]
-[GPU MEM][During Training (1st batch)] 290.938 / 15095.1 MB
-=== Batch 0/781 | Loss = 0.301243
-=== Batch 100/781 | Loss = 0.260503
-=== Batch 200/781 | Loss = 0.25514
-=== Batch 300/781 | Loss = 0.254628
-=== Batch 400/781 | Loss = 0.2283
-=== Batch 500/781 | Loss = 0.20672
-=== Batch 600/781 | Loss = 0.226977
-=== Batch 700/781 | Loss = 0.187724
-Epoch 0 | Avg Loss = 0.237794 | Time = 42292.3 ms
+[GPU MEM][During Training (1st batch)] 380.938 / 15095.1 MB
+=== Batch 0/781 | Loss = 1.30585
+=== Batch 100/781 | Loss = 0.270359
+=== Batch 200/781 | Loss = 0.228705
+=== Batch 300/781 | Loss = 0.232734
+=== Batch 400/781 | Loss = 0.256115
+=== Batch 500/781 | Loss = 0.235143
+=== Batch 600/781 | Loss = 0.209117
+=== Batch 700/781 | Loss = 0.220084
+Epoch 0 | Avg Loss = 0.259901 | Time = 41776.4 ms
 [Epoch 1]
-=== Batch 0/781 | Loss = 0.19584
-=== Batch 100/781 | Loss = 0.170262
-=== Batch 200/781 | Loss = 0.182354
-=== Batch 300/781 | Loss = 0.170744
-=== Batch 400/781 | Loss = 0.174929
-=== Batch 500/781 | Loss = 0.170021
-=== Batch 600/781 | Loss = 0.139781
-=== Batch 700/781 | Loss = 0.177319
-Epoch 1 | Avg Loss = 0.166841 | Time = 43165.8 ms
+=== Batch 0/781 | Loss = 0.232164
+=== Batch 100/781 | Loss = 0.20292
+=== Batch 200/781 | Loss = 0.190637
+=== Batch 300/781 | Loss = 0.198608
+=== Batch 400/781 | Loss = 0.194239
+=== Batch 500/781 | Loss = 0.185483
+=== Batch 600/781 | Loss = 0.157919
+=== Batch 700/781 | Loss = 0.185413
+Epoch 1 | Avg Loss = 0.189903 | Time = 43409.3 ms
 [Epoch 2]
-=== Batch 0/781 | Loss = 0.154098
-=== Batch 100/781 | Loss = 0.130174
-=== Batch 200/781 | Loss = 0.119532
-=== Batch 300/781 | Loss = 0.14583
-=== Batch 400/781 | Loss = 0.150307
-=== Batch 500/781 | Loss = 0.130481
-=== Batch 600/781 | Loss = 0.111867
-=== Batch 700/781 | Loss = 0.123162
-Epoch 2 | Avg Loss = 0.124672 | Time = 42396.7 ms
+=== Batch 0/781 | Loss = 0.159869
+=== Batch 100/781 | Loss = 0.167176
+=== Batch 200/781 | Loss = 0.158714
+=== Batch 300/781 | Loss = 0.179495
+=== Batch 400/781 | Loss = 0.170576
+=== Batch 500/781 | Loss = 0.164667
+=== Batch 600/781 | Loss = 0.15318
+=== Batch 700/781 | Loss = 0.173772
+Epoch 2 | Avg Loss = 0.163382 | Time = 42354.1 ms
 [Epoch 3]
-=== Batch 0/781 | Loss = 0.118543
-=== Batch 100/781 | Loss = 0.0986898
-=== Batch 200/781 | Loss = 0.113832
-=== Batch 300/781 | Loss = 0.110054
-=== Batch 400/781 | Loss = 0.0938866
-=== Batch 500/781 | Loss = 0.0982623
-=== Batch 600/781 | Loss = 0.0868742
-=== Batch 700/781 | Loss = 0.0872194
-Epoch 3 | Avg Loss = 0.0996062 | Time = 42840.9 ms
+=== Batch 0/781 | Loss = 0.163406
+=== Batch 100/781 | Loss = 0.153968
+=== Batch 200/781 | Loss = 0.156187
+=== Batch 300/781 | Loss = 0.156851
+=== Batch 400/781 | Loss = 0.12426
+=== Batch 500/781 | Loss = 0.152199
+=== Batch 600/781 | Loss = 0.148898
+=== Batch 700/781 | Loss = 0.133136
+Epoch 3 | Avg Loss = 0.145046 | Time = 42857.4 ms
 [Epoch 4]
-=== Batch 0/781 | Loss = 0.0865112
-=== Batch 100/781 | Loss = 0.0887384
-=== Batch 200/781 | Loss = 0.0875698
-=== Batch 300/781 | Loss = 0.0765424
-=== Batch 400/781 | Loss = 0.0799007
-=== Batch 500/781 | Loss = 0.102655
-=== Batch 600/781 | Loss = 0.0770103
-=== Batch 700/781 | Loss = 0.0870136
-Epoch 4 | Avg Loss = 0.0847201 | Time = 42659.8 ms
+=== Batch 0/781 | Loss = 0.128779
+=== Batch 100/781 | Loss = 0.127681
+=== Batch 200/781 | Loss = 0.121369
+=== Batch 300/781 | Loss = 0.118865
+=== Batch 400/781 | Loss = 0.135128
+=== Batch 500/781 | Loss = 0.12412
+=== Batch 600/781 | Loss = 0.123728
+=== Batch 700/781 | Loss = 0.123367
+Epoch 4 | Avg Loss = 0.130948 | Time = 42576.5 ms
 [Epoch 5]
-=== Batch 0/781 | Loss = 0.0802544
-=== Batch 100/781 | Loss = 0.0845847
-=== Batch 200/781 | Loss = 0.0773024
-=== Batch 300/781 | Loss = 0.0806808
-=== Batch 400/781 | Loss = 0.0751702
-=== Batch 500/781 | Loss = 0.0712454
-=== Batch 600/781 | Loss = 0.0729131
-=== Batch 700/781 | Loss = 0.0746917
-Epoch 5 | Avg Loss = 0.0758722 | Time = 42641.3 ms
+=== Batch 0/781 | Loss = 0.124209
+=== Batch 100/781 | Loss = 0.13237
+=== Batch 200/781 | Loss = 0.116384
+=== Batch 300/781 | Loss = 0.120118
+=== Batch 400/781 | Loss = 0.113936
+=== Batch 500/781 | Loss = 0.126246
+=== Batch 600/781 | Loss = 0.110877
+=== Batch 700/781 | Loss = 0.101497
+Epoch 5 | Avg Loss = 0.119195 | Time = 42684.7 ms
 [Epoch 6]
-=== Batch 0/781 | Loss = 0.067998
-=== Batch 100/781 | Loss = 0.0587334
-=== Batch 200/781 | Loss = 0.075832
-=== Batch 300/781 | Loss = 0.0770561
-=== Batch 400/781 | Loss = 0.0641825
-=== Batch 500/781 | Loss = 0.0684392
-=== Batch 600/781 | Loss = 0.0819264
-=== Batch 700/781 | Loss = 0.0674722
-Epoch 6 | Avg Loss = 0.0706121 | Time = 42860.8 ms
+=== Batch 0/781 | Loss = 0.131154
+=== Batch 100/781 | Loss = 0.0996167
+=== Batch 200/781 | Loss = 0.122658
+=== Batch 300/781 | Loss = 0.107251
+=== Batch 400/781 | Loss = 0.109228
+=== Batch 500/781 | Loss = 0.104217
+=== Batch 600/781 | Loss = 0.109487
+=== Batch 700/781 | Loss = 0.107804
+Epoch 6 | Avg Loss = 0.108427 | Time = 42616.5 ms
 [Epoch 7]
-=== Batch 0/781 | Loss = 0.0754319
-=== Batch 100/781 | Loss = 0.0711856
-=== Batch 200/781 | Loss = 0.0546562
-=== Batch 300/781 | Loss = 0.0570091
-=== Batch 400/781 | Loss = 0.0679521
-=== Batch 500/781 | Loss = 0.0592681
-=== Batch 600/781 | Loss = 0.0677605
-=== Batch 700/781 | Loss = 0.0748869
-Epoch 7 | Avg Loss = 0.0674825 | Time = 42910.6 ms
+=== Batch 0/781 | Loss = 0.102215
+=== Batch 100/781 | Loss = 0.107697
+=== Batch 200/781 | Loss = 0.107799
+=== Batch 300/781 | Loss = 0.0905127
+=== Batch 400/781 | Loss = 0.0946632
+=== Batch 500/781 | Loss = 0.0869365
+=== Batch 600/781 | Loss = 0.0936937
+=== Batch 700/781 | Loss = 0.105538
+Epoch 7 | Avg Loss = 0.0994043 | Time = 42561.6 ms
 [Epoch 8]
-=== Batch 0/781 | Loss = 0.0682887
-=== Batch 100/781 | Loss = 0.0617945
-=== Batch 200/781 | Loss = 0.0751635
-=== Batch 300/781 | Loss = 0.0721509
-=== Batch 400/781 | Loss = 0.0712761
-=== Batch 500/781 | Loss = 0.0638059
-=== Batch 600/781 | Loss = 0.0723642
-=== Batch 700/781 | Loss = 0.0582091
-Epoch 8 | Avg Loss = 0.0656345 | Time = 42804.9 ms
+=== Batch 0/781 | Loss = 0.0905408
+=== Batch 100/781 | Loss = 0.0995189
+=== Batch 200/781 | Loss = 0.0847613
+=== Batch 300/781 | Loss = 0.0969432
+=== Batch 400/781 | Loss = 0.0890671
+=== Batch 500/781 | Loss = 0.0952893
+=== Batch 600/781 | Loss = 0.091024
+=== Batch 700/781 | Loss = 0.0830996
+Epoch 8 | Avg Loss = 0.0927618 | Time = 42567.3 ms
 [Epoch 9]
-=== Batch 0/781 | Loss = 0.0587122
-=== Batch 100/781 | Loss = 0.0639362
-=== Batch 200/781 | Loss = 0.0588901
-=== Batch 300/781 | Loss = 0.0748678
-=== Batch 400/781 | Loss = 0.0653682
-=== Batch 500/781 | Loss = 0.0607441
-=== Batch 600/781 | Loss = 0.0653371
-=== Batch 700/781 | Loss = 0.0541674
-Epoch 9 | Avg Loss = 0.0645253 | Time = 42710.1 ms
+=== Batch 0/781 | Loss = 0.0799661
+=== Batch 100/781 | Loss = 0.0867697
+=== Batch 200/781 | Loss = 0.0912888
+=== Batch 300/781 | Loss = 0.0949672
+=== Batch 400/781 | Loss = 0.0844242
+=== Batch 500/781 | Loss = 0.0840787
+=== Batch 600/781 | Loss = 0.0859757
+=== Batch 700/781 | Loss = 0.0845848
+Epoch 9 | Avg Loss = 0.0878145 | Time = 42561.1 ms
 [Epoch 10]
-=== Batch 0/781 | Loss = 0.0618287
-=== Batch 100/781 | Loss = 0.0665104
-=== Batch 200/781 | Loss = 0.0658577
-=== Batch 300/781 | Loss = 0.0647202
-=== Batch 400/781 | Loss = 0.0658553
-=== Batch 500/781 | Loss = 0.0564185
-=== Batch 600/781 | Loss = 0.0712164
-=== Batch 700/781 | Loss = 0.0611863
-Epoch 10 | Avg Loss = 0.0638709 | Time = 42732.1 ms
+=== Batch 0/781 | Loss = 0.0829252
+=== Batch 100/781 | Loss = 0.0877739
+=== Batch 200/781 | Loss = 0.0925489
+=== Batch 300/781 | Loss = 0.0815895
+=== Batch 400/781 | Loss = 0.0821869
+=== Batch 500/781 | Loss = 0.0934228
+=== Batch 600/781 | Loss = 0.0827237
+=== Batch 700/781 | Loss = 0.0887734
+Epoch 10 | Avg Loss = 0.0839899 | Time = 42572.9 ms
 [Epoch 11]
-=== Batch 0/781 | Loss = 0.0668149
-=== Batch 100/781 | Loss = 0.0626859
-=== Batch 200/781 | Loss = 0.0595393
-=== Batch 300/781 | Loss = 0.0631758
-=== Batch 400/781 | Loss = 0.0666602
-=== Batch 500/781 | Loss = 0.0690244
-=== Batch 600/781 | Loss = 0.0582645
-=== Batch 700/781 | Loss = 0.0626719
-Epoch 11 | Avg Loss = 0.0634843 | Time = 42773.7 ms
+=== Batch 0/781 | Loss = 0.0761355
+=== Batch 100/781 | Loss = 0.0892061
+=== Batch 200/781 | Loss = 0.0850969
+=== Batch 300/781 | Loss = 0.0845377
+=== Batch 400/781 | Loss = 0.0743558
+=== Batch 500/781 | Loss = 0.0774282
+=== Batch 600/781 | Loss = 0.0781479
+=== Batch 700/781 | Loss = 0.0844238
+Epoch 11 | Avg Loss = 0.0809479 | Time = 42589.8 ms
 [Epoch 12]
-=== Batch 0/781 | Loss = 0.0552711
-=== Batch 100/781 | Loss = 0.0573717
-=== Batch 200/781 | Loss = 0.0599232
-=== Batch 300/781 | Loss = 0.0621837
-=== Batch 400/781 | Loss = 0.0646441
-=== Batch 500/781 | Loss = 0.0693973
-=== Batch 600/781 | Loss = 0.0683367
-=== Batch 700/781 | Loss = 0.0609333
-Epoch 12 | Avg Loss = 0.0632522 | Time = 42801 ms
+=== Batch 0/781 | Loss = 0.0751734
+=== Batch 100/781 | Loss = 0.0750209
+=== Batch 200/781 | Loss = 0.0789507
+=== Batch 300/781 | Loss = 0.0767954
+=== Batch 400/781 | Loss = 0.0776957
+=== Batch 500/781 | Loss = 0.0841335
+=== Batch 600/781 | Loss = 0.0728587
+=== Batch 700/781 | Loss = 0.0856889
+Epoch 12 | Avg Loss = 0.0784509 | Time = 42631.1 ms
 [Epoch 13]
-=== Batch 0/781 | Loss = 0.0610248
-=== Batch 100/781 | Loss = 0.0570455
-=== Batch 200/781 | Loss = 0.0612111
-=== Batch 300/781 | Loss = 0.0679392
-=== Batch 400/781 | Loss = 0.0562139
-=== Batch 500/781 | Loss = 0.0671975
-=== Batch 600/781 | Loss = 0.0642937
-=== Batch 700/781 | Loss = 0.0653707
-Epoch 13 | Avg Loss = 0.0631124 | Time = 42803.5 ms
+=== Batch 0/781 | Loss = 0.0701052
+=== Batch 100/781 | Loss = 0.0781652
+=== Batch 200/781 | Loss = 0.0696171
+=== Batch 300/781 | Loss = 0.0784332
+=== Batch 400/781 | Loss = 0.0817552
+=== Batch 500/781 | Loss = 0.0719352
+=== Batch 600/781 | Loss = 0.0747668
+=== Batch 700/781 | Loss = 0.0693446
+Epoch 13 | Avg Loss = 0.0763471 | Time = 42631.8 ms
 [Epoch 14]
-=== Batch 0/781 | Loss = 0.0610579
-=== Batch 100/781 | Loss = 0.0609221
-=== Batch 200/781 | Loss = 0.0597839
-=== Batch 300/781 | Loss = 0.0543345
-=== Batch 400/781 | Loss = 0.0619761
-=== Batch 500/781 | Loss = 0.0576103
-=== Batch 600/781 | Loss = 0.0705694
-=== Batch 700/781 | Loss = 0.0619035
-Epoch 14 | Avg Loss = 0.0630302 | Time = 42785.3 ms
+=== Batch 0/781 | Loss = 0.0672002
+=== Batch 100/781 | Loss = 0.0711565
+=== Batch 200/781 | Loss = 0.075275
+=== Batch 300/781 | Loss = 0.0716561
+=== Batch 400/781 | Loss = 0.0736648
+=== Batch 500/781 | Loss = 0.0738199
+=== Batch 600/781 | Loss = 0.073254
+=== Batch 700/781 | Loss = 0.0661319
+Epoch 14 | Avg Loss = 0.0744901 | Time = 42618.1 ms
 [Epoch 15]
-=== Batch 0/781 | Loss = 0.0643678
-=== Batch 100/781 | Loss = 0.0706912
-=== Batch 200/781 | Loss = 0.0621244
-=== Batch 300/781 | Loss = 0.0677264
-=== Batch 400/781 | Loss = 0.0635413
-=== Batch 500/781 | Loss = 0.0598134
-=== Batch 600/781 | Loss = 0.0593
-=== Batch 700/781 | Loss = 0.0690279
-Epoch 15 | Avg Loss = 0.0629849 | Time = 42778.9 ms
+=== Batch 0/781 | Loss = 0.0730278
+=== Batch 100/781 | Loss = 0.0701782
+=== Batch 200/781 | Loss = 0.0726205
+=== Batch 300/781 | Loss = 0.0748233
+=== Batch 400/781 | Loss = 0.0767673
+=== Batch 500/781 | Loss = 0.0748553
+=== Batch 600/781 | Loss = 0.0770741
+=== Batch 700/781 | Loss = 0.0732208
+Epoch 15 | Avg Loss = 0.0728075 | Time = 42561.3 ms
 [Epoch 16]
-=== Batch 0/781 | Loss = 0.0627324
-=== Batch 100/781 | Loss = 0.0630441
-=== Batch 200/781 | Loss = 0.0620299
-=== Batch 300/781 | Loss = 0.0602209
-=== Batch 400/781 | Loss = 0.0606154
-=== Batch 500/781 | Loss = 0.0569876
-=== Batch 600/781 | Loss = 0.062635
-=== Batch 700/781 | Loss = 0.0669067
-Epoch 16 | Avg Loss = 0.062952 | Time = 42783.5 ms
+=== Batch 0/781 | Loss = 0.0761551
+=== Batch 100/781 | Loss = 0.0693967
+=== Batch 200/781 | Loss = 0.0704196
+=== Batch 300/781 | Loss = 0.0745857
+=== Batch 400/781 | Loss = 0.0683674
+=== Batch 500/781 | Loss = 0.0725316
+=== Batch 600/781 | Loss = 0.0748297
+=== Batch 700/781 | Loss = 0.0636897
+Epoch 16 | Avg Loss = 0.0712067 | Time = 42539.5 ms
 [Epoch 17]
-=== Batch 0/781 | Loss = 0.0688323
-=== Batch 100/781 | Loss = 0.059882
-=== Batch 200/781 | Loss = 0.0682001
-=== Batch 300/781 | Loss = 0.0560139
-=== Batch 400/781 | Loss = 0.0631714
-=== Batch 500/781 | Loss = 0.0710975
-=== Batch 600/781 | Loss = 0.0690859
-=== Batch 700/781 | Loss = 0.0588502
-Epoch 17 | Avg Loss = 0.062935 | Time = 42773.4 ms
+=== Batch 0/781 | Loss = 0.0749635
+=== Batch 100/781 | Loss = 0.0689691
+=== Batch 200/781 | Loss = 0.0798411
+=== Batch 300/781 | Loss = 0.0673152
+=== Batch 400/781 | Loss = 0.0739308
+=== Batch 500/781 | Loss = 0.0645258
+=== Batch 600/781 | Loss = 0.0692992
+=== Batch 700/781 | Loss = 0.0663659
+Epoch 17 | Avg Loss = 0.0695799 | Time = 42567.7 ms
 [Epoch 18]
-=== Batch 0/781 | Loss = 0.0638315
-=== Batch 100/781 | Loss = 0.0710297
-=== Batch 200/781 | Loss = 0.063088
-=== Batch 300/781 | Loss = 0.0608583
-=== Batch 400/781 | Loss = 0.0600225
-=== Batch 500/781 | Loss = 0.0602257
-=== Batch 600/781 | Loss = 0.0581282
-=== Batch 700/781 | Loss = 0.0689002
-Epoch 18 | Avg Loss = 0.0629291 | Time = 42788.2 ms
+=== Batch 0/781 | Loss = 0.0641208
+=== Batch 100/781 | Loss = 0.0605174
+=== Batch 200/781 | Loss = 0.0609633
+=== Batch 300/781 | Loss = 0.0675887
+=== Batch 400/781 | Loss = 0.066448
+=== Batch 500/781 | Loss = 0.0717893
+=== Batch 600/781 | Loss = 0.0678767
+=== Batch 700/781 | Loss = 0.0620519
+Epoch 18 | Avg Loss = 0.067838 | Time = 42616.4 ms
 [Epoch 19]
-=== Batch 0/781 | Loss = 0.0682232
-=== Batch 100/781 | Loss = 0.0629058
-=== Batch 200/781 | Loss = 0.0632838
-=== Batch 300/781 | Loss = 0.0653623
-=== Batch 400/781 | Loss = 0.0595683
-=== Batch 500/781 | Loss = 0.0656077
-=== Batch 600/781 | Loss = 0.0638081
-=== Batch 700/781 | Loss = 0.0604673
-Epoch 19 | Avg Loss = 0.0629201 | Time = 42835.3 ms
-[GPU MEM][After Training] 290.938 / 15095.1 MB
+=== Batch 0/781 | Loss = 0.071772
+=== Batch 100/781 | Loss = 0.0711475
+=== Batch 200/781 | Loss = 0.0653068
+=== Batch 300/781 | Loss = 0.070805
+=== Batch 400/781 | Loss = 0.0628208
+=== Batch 500/781 | Loss = 0.0615224
+=== Batch 600/781 | Loss = 0.0677782
+=== Batch 700/781 | Loss = 0.0621309
+Epoch 19 | Avg Loss = 0.0660035 | Time = 42647.2 ms
+[GPU MEM][After Training] 380.938 / 15095.1 MB
 
-Total training time = 855138 ms
+Total training time = 851941 ms
 ========== TRAINING DONE ==========

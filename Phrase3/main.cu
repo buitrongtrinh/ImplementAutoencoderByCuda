@@ -38,7 +38,7 @@ int main() {
 
     const int BATCH_SIZE = 64;
     const int EPOCHS = 20;
-    const float LR = 0.001f;
+    const float LR = 0.009f;
 
     std::cout << "========== GPU AUTOENCODER TRAINING ==========\n";
     std::cout << "Batch size = " << BATCH_SIZE << "\n";
