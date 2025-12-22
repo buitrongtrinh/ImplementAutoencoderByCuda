@@ -1,8 +1,10 @@
 #include "kernels_backward.cuh"
 #include <math.h>
 
+#define LEAKY_RELU_ALPHA 0.01f
+
 // =======================================================
-// ReLU backward - Optimized
+// Leaky ReLU backward - Optimized
 // =======================================================
 __global__ void relu_backward(
     const float* __restrict__ input,
@@ -12,7 +14,7 @@ __global__ void relu_backward(
 ) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n)
-        d_in[i] = (input[i] > 0.0f) ? d_out[i] : 0.0f;
+        d_in[i] = (input[i] > 0.0f) ? d_out[i] : LEAKY_RELU_ALPHA * d_out[i];
 }
 
 // =======================================================

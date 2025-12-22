@@ -2,6 +2,8 @@
 
 #define TILE_SIZE 16
 #define TILE_HALO (TILE_SIZE + 2)
+#define LEAKY_RELU_ALPHA 0.01f
+
 __global__ void conv2d(
     const float* input,
     const float* weight,
@@ -269,13 +271,14 @@ __global__ void conv2d_multi_oc_relu(
         }
     }
     
-    // Write với ReLU
+    // Write với Leaky ReLU
     if (valid) {
         #pragma unroll
         for (int i = 0; i < OC_PER_BLOCK; i++) {
             int oc = oc_base + i;
             if (oc < Cout) {
-                output[((b * Cout + oc) * H + out_y) * W + out_x] = fmaxf(0.0f, sums[i]);
+                float val = sums[i];
+                output[((b * Cout + oc) * H + out_y) * W + out_x] = (val > 0.0f) ? val : LEAKY_RELU_ALPHA * val;
             }
         }
     }
@@ -461,7 +464,8 @@ __global__ void conv2d_8x8_multi_oc_relu(
     for (int i = 0; i < OC_PER_BLOCK; i++) {
         int oc = oc_base + i;
         if (oc < Cout) {
-            output[((b * Cout + oc) * 8 + ty) * 8 + tx] = fmaxf(0.0f, sums[i]);
+            float val = sums[i];
+            output[((b * Cout + oc) * 8 + ty) * 8 + tx] = (val > 0.0f) ? val : LEAKY_RELU_ALPHA * val;
         }
     }
 }
@@ -598,7 +602,8 @@ __global__ void conv2d_cin3_oc4_relu(
                     sum += in2[k] * w2[k];
                 }
                 
-                output[((b * Cout + oc) * H + out_y) * W + out_x] = fmaxf(0.0f, sum);
+                float val = sum;
+                output[((b * Cout + oc) * H + out_y) * W + out_x] = (val > 0.0f) ? val : LEAKY_RELU_ALPHA * val;
             }
         }
     }
@@ -705,7 +710,10 @@ __global__ void conv2d_cout3_all(
 // =======================================================
 __global__ void relu_opt(float* x, int n) {
     int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n) x[i] = fmaxf(0.0f, x[i]);
+    if (i < n) {
+        float val = x[i];
+        x[i] = (val > 0.0f) ? val : LEAKY_RELU_ALPHA * val;
+    }
 }
 
 __global__ void maxpool2x2_opt(
