@@ -44,23 +44,24 @@ void GPUAutoencoder::allocateHostMemory() {
 // ================= WEIGHT INITIALIZATION =================
 void GPUAutoencoder::initializeWeights() {
     std::mt19937 gen(42);
-    std::normal_distribution<float> dist(0.0f, 0.02f);
 
-    auto init_w = [&](float* w, int n) {
+    auto init_w = [&](float* w, int n, int fan_in) {
+        float std = sqrt(2.0f / fan_in);
+        std::normal_distribution<float> dist(0.0f, std);
         for (int i = 0; i < n; i++)
             w[i] = dist(gen);
     };
 
-    init_w(h_w1, 3*3*3*256);
-    init_w(h_w2, 3*3*256*128);
-    init_w(h_w3, 3*3*128*128);
-    init_w(h_w4, 3*3*128*256);
-    init_w(h_w5, 3*3*256*3);
+    init_w(h_w1, 3*3*3*256, 3*3*3);
+    init_w(h_w2, 3*3*256*128, 3*3*256);
+    init_w(h_w3, 3*3*128*128, 3*3*128);
+    init_w(h_w4, 3*3*128*256, 3*3*128);
+    init_w(h_w5, 3*3*256*3, 3*3*256);
 
-    std::fill(h_b1, h_b1 + 256, 0.0f);
-    std::fill(h_b2, h_b2 + 128, 0.0f);
-    std::fill(h_b3, h_b3 + 128, 0.0f);
-    std::fill(h_b4, h_b4 + 256, 0.0f);
+    std::fill(h_b1, h_b1 + 256, 0.01f);
+    std::fill(h_b2, h_b2 + 128, 0.01f);
+    std::fill(h_b3, h_b3 + 128, 0.01f);
+    std::fill(h_b4, h_b4 + 256, 0.01f);
     std::fill(h_b5, h_b5 + 3,   0.0f);
 }
 
