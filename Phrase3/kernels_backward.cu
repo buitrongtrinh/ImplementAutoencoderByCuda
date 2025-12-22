@@ -1,7 +1,7 @@
 #include "kernels_backward.cuh"
 #include <math.h>
 
-#define LEAKY_RELU_ALPHA 0.01f
+#define LEAKY_RELU_ALPHA 0.0f
 
 // =======================================================
 // Leaky ReLU backward - Optimized

@@ -1,5 +1,9 @@
-#pragma once
+#ifndef KERNELS_FORWARD_CUH
+#define KERNELS_FORWARD_CUH
+
 #include <cuda_runtime.h>
+
+// Basic convolution
 __global__ void conv2d(
     const float* input,
     const float* weight,
@@ -7,17 +11,8 @@ __global__ void conv2d(
     float* output,
     int B, int Cin, int H, int W, int Cout
 );
-/*
- * HIGHLY OPTIMIZED FORWARD KERNELS
- * - Shared Memory Tiling
- * - Loop Unrolling
- * - Multiple Output Channels per Block
- * Layout: BCHW
- */
 
-// ================= MULTI-CHANNEL CONVOLUTIONS =================
-
-// General: mỗi block tính OC_PER_BLOCK output channels
+// Multi-OC without ReLU
 template<int OC_PER_BLOCK>
 __global__ void conv2d_multi_oc(
     const float* __restrict__ input,
@@ -27,17 +22,18 @@ __global__ void conv2d_multi_oc(
     int B, int Cin, int H, int W, int Cout
 );
 
-// Fused với ReLU
+// Multi-OC with fused ReLU (saves pre-activation)
 template<int OC_PER_BLOCK>
 __global__ void conv2d_multi_oc_relu(
     const float* __restrict__ input,
     const float* __restrict__ weight,
     const float* __restrict__ bias,
+    float* __restrict__ pre_relu,    // ✅ THÊM
     float* __restrict__ output,
     int B, int Cin, int H, int W, int Cout
 );
 
-// Specialized cho 8x8 spatial
+// 8x8 specialized without ReLU
 template<int OC_PER_BLOCK>
 __global__ void conv2d_8x8_multi_oc(
     const float* __restrict__ input,
@@ -47,27 +43,28 @@ __global__ void conv2d_8x8_multi_oc(
     int B, int Cin, int Cout
 );
 
+// 8x8 specialized with fused ReLU (saves pre-activation)
 template<int OC_PER_BLOCK>
 __global__ void conv2d_8x8_multi_oc_relu(
     const float* __restrict__ input,
     const float* __restrict__ weight,
     const float* __restrict__ bias,
+    float* __restrict__ pre_relu,    // ✅ THÊM
     float* __restrict__ output,
     int B, int Cin, int Cout
 );
 
-// ================= SPECIALIZED KERNELS =================
-
-// Conv1: Cin=3, tính 4 output channels per block
+// Specialized Cin=3 with fused ReLU (saves pre-activation)
 __global__ void conv2d_cin3_oc4_relu(
     const float* __restrict__ input,
     const float* __restrict__ weight,
     const float* __restrict__ bias,
+    float* __restrict__ pre_relu,    // ✅ THÊM
     float* __restrict__ output,
     int B, int H, int W, int Cout
 );
 
-// Conv5: Cout=3, tính tất cả 3 output channels per block
+// Specialized Cout=3 (no ReLU)
 __global__ void conv2d_cout3_all(
     const float* __restrict__ input,
     const float* __restrict__ weight,
@@ -76,7 +73,7 @@ __global__ void conv2d_cout3_all(
     int B, int Cin, int H, int W
 );
 
-// ================= OTHER LAYERS =================
+// Other operations
 __global__ void relu_opt(float* x, int n);
 
 __global__ void maxpool2x2_opt(
@@ -97,3 +94,5 @@ __global__ void mse_loss_opt(
     float* loss,
     int n
 );
+
+#endif // KERNELS_FORWARD_CUH

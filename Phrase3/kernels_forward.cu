@@ -2,7 +2,7 @@
 
 #define TILE_SIZE 16
 #define TILE_HALO (TILE_SIZE + 2)
-#define LEAKY_RELU_ALPHA 0.01f
+#define LEAKY_RELU_ALPHA 0.0f
 
 __global__ void conv2d(
     const float* input,
@@ -181,12 +181,14 @@ __global__ void conv2d_multi_oc(
 
 // =======================================================
 // CONV2D MULTI OC + RELU FUSED
+// OUTPUT: pre_relu (pre-activation), output (after ReLU)
 // =======================================================
 template<int OC_PER_BLOCK>
 __global__ void conv2d_multi_oc_relu(
     const float* __restrict__ input,
     const float* __restrict__ weight,
     const float* __restrict__ bias,
+    float* __restrict__ pre_relu,   // ✅ THÊM: lưu pre-activation
     float* __restrict__ output,
     int B, int Cin, int H, int W, int Cout
 ) {
@@ -271,14 +273,16 @@ __global__ void conv2d_multi_oc_relu(
         }
     }
     
-    // Write với Leaky ReLU
+    // ✅ Write BOTH pre-activation và post-ReLU
     if (valid) {
         #pragma unroll
         for (int i = 0; i < OC_PER_BLOCK; i++) {
             int oc = oc_base + i;
             if (oc < Cout) {
                 float val = sums[i];
-                output[((b * Cout + oc) * H + out_y) * W + out_x] = (val > 0.0f) ? val : LEAKY_RELU_ALPHA * val;
+                int idx = ((b * Cout + oc) * H + out_y) * W + out_x;
+                pre_relu[idx] = val;  // ✅ Lưu pre-activation
+                output[idx] = (val > 0.0f) ? val : LEAKY_RELU_ALPHA * val;  // ReLU
             }
         }
     }
@@ -390,6 +394,7 @@ __global__ void conv2d_8x8_multi_oc_relu(
     const float* __restrict__ input,
     const float* __restrict__ weight,
     const float* __restrict__ bias,
+    float* __restrict__ pre_relu,   // ✅ THÊM: lưu pre-activation
     float* __restrict__ output,
     int B, int Cin, int Cout
 ) {
@@ -460,12 +465,15 @@ __global__ void conv2d_8x8_multi_oc_relu(
         }
     }
     
+    // ✅ Write BOTH pre-activation và post-ReLU
     #pragma unroll
     for (int i = 0; i < OC_PER_BLOCK; i++) {
         int oc = oc_base + i;
         if (oc < Cout) {
             float val = sums[i];
-            output[((b * Cout + oc) * 8 + ty) * 8 + tx] = (val > 0.0f) ? val : LEAKY_RELU_ALPHA * val;
+            int idx = ((b * Cout + oc) * 8 + ty) * 8 + tx;
+            pre_relu[idx] = val;  // ✅ Lưu pre-activation
+            output[idx] = (val > 0.0f) ? val : LEAKY_RELU_ALPHA * val;  // ReLU
         }
     }
 }
@@ -479,6 +487,7 @@ __global__ void conv2d_cin3_oc4_relu(
     const float* __restrict__ input,
     const float* __restrict__ weight,
     const float* __restrict__ bias,
+    float* __restrict__ pre_relu,   // ✅ THÊM: lưu pre-activation
     float* __restrict__ output,
     int B, int H, int W, int Cout
 ) {
@@ -602,8 +611,9 @@ __global__ void conv2d_cin3_oc4_relu(
                     sum += in2[k] * w2[k];
                 }
                 
-                float val = sum;
-                output[((b * Cout + oc) * H + out_y) * W + out_x] = (val > 0.0f) ? val : LEAKY_RELU_ALPHA * val;
+                int idx = ((b * Cout + oc) * H + out_y) * W + out_x;
+                pre_relu[idx] = sum;  // ✅ Lưu pre-activation
+                output[idx] = (sum > 0.0f) ? sum : LEAKY_RELU_ALPHA * sum;  // ReLU
             }
         }
     }
@@ -696,12 +706,12 @@ __global__ void conv2d_cout3_all(
         }
     }
     
-      if (valid) {
-          int base = (b * 3 * H + out_y) * W + out_x;
-          output[base]             = sum0;  // Channel 0
-          output[base + H * W]     = sum1;  // Channel 1  
-          output[base + 2 * H * W] = sum2;  // Channel 2
-      }
+    if (valid) {
+        int base = (b * 3 * H + out_y) * W + out_x;
+        output[base]             = sum0;  // Channel 0
+        output[base + H * W]     = sum1;  // Channel 1  
+        output[base + 2 * H * W] = sum2;  // Channel 2
+    }
 }
 
 
@@ -793,9 +803,9 @@ __global__ void mse_loss_opt(
 // =======================================================
 template __global__ void conv2d_multi_oc<4>(const float*, const float*, const float*, float*, int, int, int, int, int);
 template __global__ void conv2d_multi_oc<8>(const float*, const float*, const float*, float*, int, int, int, int, int);
-template __global__ void conv2d_multi_oc_relu<4>(const float*, const float*, const float*, float*, int, int, int, int, int);
-template __global__ void conv2d_multi_oc_relu<8>(const float*, const float*, const float*, float*, int, int, int, int, int);
+template __global__ void conv2d_multi_oc_relu<4>(const float*, const float*, const float*, float*, float*, int, int, int, int, int);
+template __global__ void conv2d_multi_oc_relu<8>(const float*, const float*, const float*, float*, float*, int, int, int, int, int);
 template __global__ void conv2d_8x8_multi_oc<4>(const float*, const float*, const float*, float*, int, int, int);
 template __global__ void conv2d_8x8_multi_oc<8>(const float*, const float*, const float*, float*, int, int, int);
-template __global__ void conv2d_8x8_multi_oc_relu<4>(const float*, const float*, const float*, float*, int, int, int);
-template __global__ void conv2d_8x8_multi_oc_relu<8>(const float*, const float*, const float*, float*, int, int, int);
+template __global__ void conv2d_8x8_multi_oc_relu<4>(const float*, const float*, const float*, float*, float*, int, int, int);
+template __global__ void conv2d_8x8_multi_oc_relu<8>(const float*, const float*, const float*, float*, float*, int, int, int);

@@ -44,24 +44,23 @@ void GPUAutoencoder::allocateHostMemory() {
 // ================= WEIGHT INITIALIZATION =================
 void GPUAutoencoder::initializeWeights() {
     std::mt19937 gen(42);
+    std::normal_distribution<float> dist(0.0f, 0.02f);
 
-    auto init_w = [&](float* w, int n, int fan_in) {
-        float std = sqrt(2.0f / fan_in);
-        std::normal_distribution<float> dist(0.0f, std);
+    auto init_w = [&](float* w, int n) {
         for (int i = 0; i < n; i++)
             w[i] = dist(gen);
     };
 
-    init_w(h_w1, 3*3*3*256, 3*3*3);
-    init_w(h_w2, 3*3*256*128, 3*3*256);
-    init_w(h_w3, 3*3*128*128, 3*3*128);
-    init_w(h_w4, 3*3*128*256, 3*3*128);
-    init_w(h_w5, 3*3*256*3, 3*3*256);
+    init_w(h_w1, 3*3*3*256);
+    init_w(h_w2, 3*3*256*128);
+    init_w(h_w3, 3*3*128*128);
+    init_w(h_w4, 3*3*128*256);
+    init_w(h_w5, 3*3*256*3);
 
-    std::fill(h_b1, h_b1 + 256, 0.01f);
-    std::fill(h_b2, h_b2 + 128, 0.01f);
-    std::fill(h_b3, h_b3 + 128, 0.01f);
-    std::fill(h_b4, h_b4 + 256, 0.01f);
+    std::fill(h_b1, h_b1 + 256, 0.0f);
+    std::fill(h_b2, h_b2 + 128, 0.0f);
+    std::fill(h_b3, h_b3 + 128, 0.0f);
+    std::fill(h_b4, h_b4 + 256, 0.0f);
     std::fill(h_b5, h_b5 + 3,   0.0f);
 }
 
@@ -105,6 +104,12 @@ void GPUAutoencoder::allocateDeviceMemory() {
     CUDA_CHECK(cudaMalloc(&d_db3, 128*sizeof(float)));
     CUDA_CHECK(cudaMalloc(&d_db4, 256*sizeof(float)));
     CUDA_CHECK(cudaMalloc(&d_db5, 3*sizeof(float)));
+
+    // ✅ THÊM: Allocate pre-activation buffers
+    CUDA_CHECK(cudaMalloc(&d_o1_pre, batch_size*32*32*256*sizeof(float)));
+    CUDA_CHECK(cudaMalloc(&d_o3_pre, batch_size*16*16*128*sizeof(float)));
+    CUDA_CHECK(cudaMalloc(&d_o5_pre, batch_size*8*8*128*sizeof(float)));
+    CUDA_CHECK(cudaMalloc(&d_o7_pre, batch_size*16*16*256*sizeof(float)));
 }
 
 // ================= COPY TO GPU =================
@@ -144,6 +149,11 @@ GPUAutoencoder::~GPUAutoencoder() {
     cudaFree(d_dw4); cudaFree(d_dw5);
     cudaFree(d_db1); cudaFree(d_db2); cudaFree(d_db3);
     cudaFree(d_db4); cudaFree(d_db5);
+    // ✅ THÊM: Free pre-activation buffers
+    cudaFree(d_o1_pre);
+    cudaFree(d_o3_pre);
+    cudaFree(d_o5_pre);
+    cudaFree(d_o7_pre);
 
     std::cout << "[GPUAutoencoder] Destroyed\n";
 }
@@ -155,6 +165,7 @@ float GPUAutoencoder::forward(float* h_input, float* h_output) {
     dim3 block16(16, 16);
     dim3 block8(8, 8);
     
+    // Copy input to GPU
     CUDA_CHECK(cudaMemcpy(d_input, h_input, B * 3 * 32 * 32 * sizeof(float), cudaMemcpyHostToDevice));
     
     // ================= ENCODER =================
@@ -163,45 +174,71 @@ float GPUAutoencoder::forward(float* h_input, float* h_output) {
     // Cin=3 specialized, 4 output channels per block
     // Grid: 2x2 tiles * (B * 256/4) = 2*2*B*64
     dim3 grid1(2, 2, B * (256 / 4));
-    conv2d_cin3_oc4_relu<<<grid1, block16>>>(d_input, d_w1, d_b1, d_o1, B, 32, 32, 256);
+    conv2d_cin3_oc4_relu<<<grid1, block16>>>(
+        d_input, d_w1, d_b1, 
+        d_o1_pre, d_o1,  // ✅ Lưu pre-activation và post-ReLU
+        B, 32, 32, 256
+    );
     
     // MaxPool1: [B,256,32,32] -> [B,256,16,16]
     int n_pool1 = B * 256 * 16 * 16;
-    maxpool2x2_opt<<<(n_pool1 + threads - 1) / threads, threads>>>(d_o1, d_o2, B, 256, 32, 32);
+    maxpool2x2_opt<<<(n_pool1 + threads - 1) / threads, threads>>>(
+        d_o1, d_o2, B, 256, 32, 32
+    );
     
     // Conv2 + ReLU: [B,256,16,16] -> [B,128,16,16]
     // 8 output channels per block -> 128/8 = 16 oc groups
     dim3 grid2(1, 1, B * (128 / 8));
-    conv2d_multi_oc_relu<8><<<grid2, block16>>>(d_o2, d_w2, d_b2, d_o3, B, 256, 16, 16, 128);
+    conv2d_multi_oc_relu<8><<<grid2, block16>>>(
+        d_o2, d_w2, d_b2, 
+        d_o3_pre, d_o3,  // ✅ Lưu pre-activation và post-ReLU
+        B, 256, 16, 16, 128
+    );
     
     // MaxPool2: [B,128,16,16] -> [B,128,8,8]
     int n_pool2 = B * 128 * 8 * 8;
-    maxpool2x2_opt<<<(n_pool2 + threads - 1) / threads, threads>>>(d_o3, d_o4, B, 128, 16, 16);
+    maxpool2x2_opt<<<(n_pool2 + threads - 1) / threads, threads>>>(
+        d_o3, d_o4, B, 128, 16, 16
+    );
     
     // ================= DECODER =================
     
     // Conv3 + ReLU: [B,128,8,8] -> [B,128,8,8]
     // 8 output channels per block -> 128/8 = 16 oc groups
     dim3 grid3(B, 128 / 8);
-    conv2d_8x8_multi_oc_relu<8><<<grid3, block8>>>(d_o4, d_w3, d_b3, d_o5, B, 128, 128);
+    conv2d_8x8_multi_oc_relu<8><<<grid3, block8>>>(
+        d_o4, d_w3, d_b3, 
+        d_o5_pre, d_o5,  // ✅ Lưu pre-activation và post-ReLU
+        B, 128, 128
+    );
     
     // Upsample1: [B,128,8,8] -> [B,128,16,16]
     int n_up1 = B * 128 * 16 * 16;
-    upsample2x_opt<<<(n_up1 + threads - 1) / threads, threads>>>(d_o5, d_o6, B, 128, 8, 8);
+    upsample2x_opt<<<(n_up1 + threads - 1) / threads, threads>>>(
+        d_o5, d_o6, B, 128, 8, 8
+    );
     
     // Conv4 + ReLU: [B,128,16,16] -> [B,256,16,16]
     // 8 output channels per block -> 256/8 = 32 oc groups
     dim3 grid4(1, 1, B * (256 / 8));
-    conv2d_multi_oc_relu<8><<<grid4, block16>>>(d_o6, d_w4, d_b4, d_o7, B, 128, 16, 16, 256);
+    conv2d_multi_oc_relu<8><<<grid4, block16>>>(
+        d_o6, d_w4, d_b4, 
+        d_o7_pre, d_o7,  // ✅ Lưu pre-activation và post-ReLU
+        B, 128, 16, 16, 256
+    );
     
     // Upsample2: [B,256,16,16] -> [B,256,32,32]
     int n_up2 = B * 256 * 32 * 32;
-    upsample2x_opt<<<(n_up2 + threads - 1) / threads, threads>>>(d_o7, d_o8, B, 256, 16, 16);
+    upsample2x_opt<<<(n_up2 + threads - 1) / threads, threads>>>(
+        d_o7, d_o8, B, 256, 16, 16
+    );
     
     // Conv5 (NO ReLU): [B,256,32,32] -> [B,3,32,32]
     // Cout=3 specialized, tính tất cả 3 output cùng lúc
     dim3 grid5(2, 2, B);
-    conv2d_cout3_all<<<grid5, block16>>>(d_o8, d_w5, d_b5, d_output, B, 256, 32, 32);
+    conv2d_cout3_all<<<grid5, block16>>>(
+        d_o8, d_w5, d_b5, d_output, B, 256, 32, 32
+    );
     
     // ================= LOSS =================
     int n_out = B * 3 * 32 * 32;
@@ -210,14 +247,18 @@ float GPUAutoencoder::forward(float* h_input, float* h_output) {
     CUDA_CHECK(cudaMalloc(&d_loss, sizeof(float)));
     CUDA_CHECK(cudaMemset(d_loss, 0, sizeof(float)));
     
-    mse_loss_opt<<<(n_out + threads - 1) / threads, threads>>>(d_output, d_input, d_loss, n_out);
+    mse_loss_opt<<<(n_out + threads - 1) / threads, threads>>>(
+        d_output, d_input, d_loss, n_out
+    );
     
     CUDA_CHECK(cudaMemcpy(&h_loss, d_loss, sizeof(float), cudaMemcpyDeviceToHost));
     CUDA_CHECK(cudaFree(d_loss));
 
     h_loss /= n_out;
     
+    // Copy output back to host
     CUDA_CHECK(cudaMemcpy(h_output, d_output, n_out * sizeof(float), cudaMemcpyDeviceToHost));
+    
     return h_loss;
 }
 void GPUAutoencoder::saveWeights(const std::string& path) {
@@ -258,7 +299,6 @@ void GPUAutoencoder::saveWeights(const std::string& path) {
 }
 
 void GPUAutoencoder::backward() {
-
     int B = batch_size;
     int threads = 256;
 
@@ -278,7 +318,7 @@ void GPUAutoencoder::backward() {
     cudaMemset(d_db5, 0, 3*sizeof(float));
 
     // ==================================================
-    // 1. dL/dOutput (MSE)
+    // 1. dL/dOutput (MSE grad)
     // ==================================================
     int n_out = B * 3 * 32 * 32;
     mse_grad<<<(n_out + threads - 1)/threads, threads>>>(
@@ -287,191 +327,223 @@ void GPUAutoencoder::backward() {
         d_output,     // reuse as grad buffer
         n_out
     );
-    // ✅ CRITICAL: Sync vì reuse d_output buffer
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // ==================================================
-    // 2. Conv5 backward
+    // 2. Conv5 backward: [B,3,32,32] <- [B,256,32,32]
+    //    NO ReLU (Conv5 không có ReLU)
     // ==================================================
-    conv_bias_backward<<<(n_out+threads-1)/threads, threads>>>(
+    
+    // Bias gradient
+    conv_bias_backward<<<3, threads>>>(
         d_output, d_db5, B, 3, 32, 32
     );
-
+    
+    // Weight gradient: [256,3,3,3]
     conv_weight_backward<<<(3*3*256*3+threads-1)/threads, threads>>>(
         d_o8, d_output, d_dw5, B, 256, 32, 32, 3
     );
-
+    
+    // Input gradient: d_o8 [B,256,32,32]
     conv_input_backward<<<(B*256*32*32+threads-1)/threads, threads>>>(
         d_output, d_w5, d_o8, B, 256, 32, 32, 3
     );
-    // ✅ Sync vì d_o8 được ghi, sẽ được đọc bởi upsample_backward
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // ==================================================
-    // 3. Upsample backward
+    // 3. Upsample2 backward: [B,256,16,16] <- [B,256,32,32]
     // ==================================================
+    cudaMemset(d_o7, 0, B*256*16*16*sizeof(float));
     upsample2x_backward<<<(B*256*32*32+threads-1)/threads, threads>>>(
         d_o8, d_o7, B, 256, 16, 16
     );
-    // ✅ Sync vì d_o7 được ghi (với atomic), sẽ được đọc/ghi bởi relu_backward
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // ==================================================
-    // 4. Conv4 backward
+    // 4. Conv4 backward: [B,256,16,16] <- [B,128,16,16]
+    //    Forward: conv2d_multi_oc_relu<8> (fused ReLU)
     // ==================================================
+    
+    // ✅ ReLU backward với pre-activation
     relu_backward<<<(B*256*16*16+threads-1)/threads, threads>>>(
-        d_o7, d_o7, d_o7, B*256*16*16
+        d_o7_pre,  // ✅ Pre-activation (trước ReLU)
+        d_o7,      // Gradient từ upsample backward
+        d_o7,      // Output gradient (overwrite)
+        B*256*16*16
     );
-    // ✅ Sync vì d_o7 in-place operation
     CUDA_CHECK(cudaDeviceSynchronize());
-
-    conv_bias_backward<<<(B*256*16*16+threads-1)/threads, threads>>>(
+    
+    // Bias gradient
+    conv_bias_backward<<<256, threads>>>(
         d_o7, d_db4, B, 256, 16, 16
     );
-
+    
+    // Weight gradient: [128,256,3,3]
     conv_weight_backward<<<(3*3*128*256+threads-1)/threads, threads>>>(
         d_o6, d_o7, d_dw4, B, 128, 16, 16, 256
     );
-
+    
+    // Input gradient: d_o6 [B,128,16,16]
     conv_input_backward<<<(B*128*16*16+threads-1)/threads, threads>>>(
         d_o7, d_w4, d_o6, B, 128, 16, 16, 256
     );
-    // ✅ Sync vì d_o6 được ghi
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // ==================================================
-    // 5. Upsample backward
+    // 5. Upsample1 backward: [B,128,8,8] <- [B,128,16,16]
     // ==================================================
+    cudaMemset(d_o5, 0, B*128*8*8*sizeof(float));
     upsample2x_backward<<<(B*128*16*16+threads-1)/threads, threads>>>(
         d_o6, d_o5, B, 128, 8, 8
     );
-    // ✅ Sync vì d_o5 được ghi (với atomic)
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // ==================================================
-    // 6. Conv3 backward
+    // 6. Conv3 backward: [B,128,8,8] <- [B,128,8,8]
+    //    Forward: conv2d_8x8_multi_oc_relu<8> (fused ReLU)
     // ==================================================
+    
+    // ✅ ReLU backward với pre-activation
     relu_backward<<<(B*128*8*8+threads-1)/threads, threads>>>(
-        d_o5, d_o5, d_o5, B*128*8*8
+        d_o5_pre,  // ✅ Pre-activation (trước ReLU)
+        d_o5,      // Gradient từ upsample backward
+        d_o5,      // Output gradient (overwrite)
+        B*128*8*8
     );
-    // ✅ Sync vì d_o5 in-place operation
     CUDA_CHECK(cudaDeviceSynchronize());
-
-    conv_bias_backward<<<(B*128*8*8+threads-1)/threads, threads>>>(
+    
+    // Bias gradient
+    conv_bias_backward<<<128, threads>>>(
         d_o5, d_db3, B, 128, 8, 8
     );
-
+    
+    // Weight gradient: [128,128,3,3]
     conv_weight_backward<<<(3*3*128*128+threads-1)/threads, threads>>>(
         d_o4, d_o5, d_dw3, B, 128, 8, 8, 128
     );
-
+    
+    // Input gradient: d_o4 [B,128,8,8]
     conv_input_backward<<<(B*128*8*8+threads-1)/threads, threads>>>(
         d_o5, d_w3, d_o4, B, 128, 8, 8, 128
     );
-    // ✅ Sync vì d_o4 được ghi
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // ==================================================
-    // 7. MaxPool backward
+    // 7. MaxPool2 backward: [B,128,16,16] <- [B,128,8,8]
     // ==================================================
+    cudaMemset(d_o3, 0, B*128*16*16*sizeof(float));
     maxpool2x2_backward<<<(B*128*8*8+threads-1)/threads, threads>>>(
         d_o3, d_o4, d_o4, d_o3, B, 128, 16, 16
     );
-    // ✅ Sync vì d_o3 được ghi (với atomic)
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // ==================================================
-    // 8. Conv2 backward
+    // 8. Conv2 backward: [B,128,16,16] <- [B,256,16,16]
+    //    Forward: conv2d_multi_oc_relu<8> (fused ReLU)
     // ==================================================
+    
+    // ✅ ReLU backward với pre-activation
     relu_backward<<<(B*128*16*16+threads-1)/threads, threads>>>(
-        d_o3, d_o3, d_o3, B*128*16*16
+        d_o3_pre,  // ✅ Pre-activation (trước ReLU)
+        d_o3,      // Gradient từ maxpool backward
+        d_o3,      // Output gradient (overwrite)
+        B*128*16*16
     );
-    // ✅ Sync vì d_o3 in-place operation
     CUDA_CHECK(cudaDeviceSynchronize());
-
-    conv_bias_backward<<<(B*128*16*16+threads-1)/threads, threads>>>(
+    
+    // Bias gradient
+    conv_bias_backward<<<128, threads>>>(
         d_o3, d_db2, B, 128, 16, 16
     );
-
+    
+    // Weight gradient: [256,128,3,3]
     conv_weight_backward<<<(3*3*256*128+threads-1)/threads, threads>>>(
         d_o2, d_o3, d_dw2, B, 256, 16, 16, 128
     );
-
+    
+    // Input gradient: d_o2 [B,256,16,16]
     conv_input_backward<<<(B*256*16*16+threads-1)/threads, threads>>>(
         d_o3, d_w2, d_o2, B, 256, 16, 16, 128
     );
-    // ✅ Sync vì d_o2 được ghi
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // ==================================================
-    // 9. MaxPool backward
+    // 9. MaxPool1 backward: [B,256,32,32] <- [B,256,16,16]
     // ==================================================
+    cudaMemset(d_o1, 0, B*256*32*32*sizeof(float));
     maxpool2x2_backward<<<(B*256*16*16+threads-1)/threads, threads>>>(
         d_o1, d_o2, d_o2, d_o1, B, 256, 32, 32
     );
-    // ✅ Sync vì d_o1 được ghi (với atomic)
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // ==================================================
-    // 10. Conv1 backward
+    // 10. Conv1 backward: [B,256,32,32] <- [B,3,32,32]
+    //     Forward: conv2d_cin3_oc4_relu (specialized Cin=3, fused ReLU)
     // ==================================================
+    
+    // ✅ ReLU backward với pre-activation
     relu_backward<<<(B*256*32*32+threads-1)/threads, threads>>>(
-        d_o1, d_o1, d_o1, B*256*32*32
+        d_o1_pre,  // ✅ Pre-activation (trước ReLU)
+        d_o1,      // Gradient từ maxpool backward
+        d_o1,      // Output gradient (overwrite)
+        B*256*32*32
     );
-    // ✅ Sync vì d_o1 in-place operation
     CUDA_CHECK(cudaDeviceSynchronize());
-
-    conv_bias_backward<<<(B*256*32*32+threads-1)/threads, threads>>>(
+    
+    // Bias gradient
+    conv_bias_backward<<<256, threads>>>(
         d_o1, d_db1, B, 256, 32, 32
     );
-
+    
+    // Weight gradient: [3,256,3,3]
     conv_weight_backward<<<(3*3*3*256+threads-1)/threads, threads>>>(
         d_input, d_o1, d_dw1, B, 3, 32, 32, 256
     );
+    
+    // Input gradient không cần vì đây là layer đầu tiên
+    
+    CUDA_CHECK(cudaDeviceSynchronize());
 
     // ==================================================
     // 11. SGD UPDATE
     // ==================================================
-    // ✅ CRITICAL: Sync before SGD updates to ensure all gradients are computed
-    CUDA_CHECK(cudaDeviceSynchronize());
+    sgd_update<<<(3*3*3*256+threads-1)/threads, threads>>>(
+        d_w1, d_dw1, learning_rate, 3*3*3*256
+    );
+    sgd_update<<<(3*3*256*128+threads-1)/threads, threads>>>(
+        d_w2, d_dw2, learning_rate, 3*3*256*128
+    );
+    sgd_update<<<(3*3*128*128+threads-1)/threads, threads>>>(
+        d_w3, d_dw3, learning_rate, 3*3*128*128
+    );
+    sgd_update<<<(3*3*128*256+threads-1)/threads, threads>>>(
+        d_w4, d_dw4, learning_rate, 3*3*128*256
+    );
+    sgd_update<<<(3*3*256*3+threads-1)/threads, threads>>>(
+        d_w5, d_dw5, learning_rate, 3*3*256*3
+    );
 
-    // Now launch all SGD updates - they can run in parallel since they're independent
-    sgd_update<<<(3*3*3*256+threads-1)/threads, threads>>>(d_w1, d_dw1, learning_rate, 3*3*3*256);
-    sgd_update<<<(3*3*256*128+threads-1)/threads, threads>>>(d_w2, d_dw2, learning_rate, 3*3*256*128);
-    sgd_update<<<(3*3*128*128+threads-1)/threads, threads>>>(d_w3, d_dw3, learning_rate, 3*3*128*128);
-    sgd_update<<<(3*3*128*256+threads-1)/threads, threads>>>(d_w4, d_dw4, learning_rate, 3*3*128*256);
-    sgd_update<<<(3*3*256*3+threads-1)/threads, threads>>>(d_w5, d_dw5, learning_rate, 3*3*256*3);
+    sgd_update<<<1, 256>>>(d_b1, d_db1, learning_rate, 256);
+    sgd_update<<<1, 128>>>(d_b2, d_db2, learning_rate, 128);
+    sgd_update<<<1, 128>>>(d_b3, d_db3, learning_rate, 128);
+    sgd_update<<<1, 256>>>(d_b4, d_db4, learning_rate, 256);
+    sgd_update<<<1, 32>>>(d_b5, d_db5, learning_rate, 3);
 
-    sgd_update<<<1,256>>>(d_b1, d_db1, learning_rate, 256);
-    sgd_update<<<1,128>>>(d_b2, d_db2, learning_rate, 128);
-    sgd_update<<<1,128>>>(d_b3, d_db3, learning_rate, 128);
-    sgd_update<<<1,256>>>(d_b4, d_db4, learning_rate, 256);
-    sgd_update<<<1,32 >>>(d_b5, d_db5, learning_rate, 3);
-
-    // ✅ Final sync to ensure all weight updates complete before returning
     CUDA_CHECK(cudaDeviceSynchronize());
 }
 void GPUAutoencoder::extractFeatures(float* h_input, float* h_latent) {
     int B = batch_size;
     int threads = 256;
-
     dim3 block16(16, 16);
 
-    // copy input lên GPU
-    CUDA_CHECK(cudaMemcpy(
-        d_input, h_input,
-        B * 3 * 32 * 32 * sizeof(float),
-        cudaMemcpyHostToDevice
-    ));
-
-    // ================= ENCODER ONLY =================
+    CUDA_CHECK(cudaMemcpy(d_input, h_input, B * 3 * 32 * 32 * sizeof(float), cudaMemcpyHostToDevice));
 
     // Conv1 + ReLU
     dim3 grid1(2, 2, B * (256 / 4));
     conv2d_cin3_oc4_relu<<<grid1, block16>>>(
-        d_input, d_w1, d_b1, d_o1, B, 32, 32, 256
+        d_input, d_w1, d_b1, d_o1_pre, d_o1, B, 32, 32, 256
     );
-
+    
     // MaxPool1
     int n_pool1 = B * 256 * 16 * 16;
     maxpool2x2_opt<<<(n_pool1 + threads - 1) / threads, threads>>>(
@@ -481,22 +553,16 @@ void GPUAutoencoder::extractFeatures(float* h_input, float* h_latent) {
     // Conv2 + ReLU
     dim3 grid2(1, 1, B * (128 / 8));
     conv2d_multi_oc_relu<8><<<grid2, block16>>>(
-        d_o2, d_w2, d_b2, d_o3, B, 256, 16, 16, 128
+        d_o2, d_w2, d_b2, d_o3_pre, d_o3, B, 256, 16, 16, 128
     );
-
-    // MaxPool2 → LATENT
+    
+    // MaxPool2
     int n_pool2 = B * 128 * 8 * 8;
     maxpool2x2_opt<<<(n_pool2 + threads - 1) / threads, threads>>>(
         d_o3, d_o4, B, 128, 16, 16
     );
 
-    // ================= COPY LATENT =================
-    CUDA_CHECK(cudaMemcpy(
-        h_latent,
-        d_o4,
-        B * 128 * 8 * 8 * sizeof(float),
-        cudaMemcpyDeviceToHost
-    ));
+    CUDA_CHECK(cudaMemcpy(h_latent, d_o4, B * 128 * 8 * 8 * sizeof(float), cudaMemcpyDeviceToHost));
 }
 void GPUAutoencoder::loadWeights(const std::string& path) {
     std::ifstream f(path, std::ios::binary);
