@@ -176,7 +176,7 @@ float GPUAutoencoder::forward(float* h_input, float* h_output) {
     dim3 grid1(2, 2, B * (256 / 4));
     conv2d_cin3_oc4_relu<<<grid1, block16>>>(
         d_input, d_w1, d_b1, 
-        d_o1_pre, d_o1,  // ✅ Lưu pre-activation và post-ReLU
+        d_o1_pre, d_o1,  // Lưu pre-activation và post-ReLU
         B, 32, 32, 256
     );
     
@@ -191,7 +191,7 @@ float GPUAutoencoder::forward(float* h_input, float* h_output) {
     dim3 grid2(1, 1, B * (128 / 8));
     conv2d_multi_oc_relu<8><<<grid2, block16>>>(
         d_o2, d_w2, d_b2, 
-        d_o3_pre, d_o3,  // ✅ Lưu pre-activation và post-ReLU
+        d_o3_pre, d_o3,  // Lưu pre-activation và post-ReLU
         B, 256, 16, 16, 128
     );
     
@@ -208,7 +208,7 @@ float GPUAutoencoder::forward(float* h_input, float* h_output) {
     dim3 grid3(B, 128 / 8);
     conv2d_8x8_multi_oc_relu<8><<<grid3, block8>>>(
         d_o4, d_w3, d_b3, 
-        d_o5_pre, d_o5,  // ✅ Lưu pre-activation và post-ReLU
+        d_o5_pre, d_o5,  // Lưu pre-activation và post-ReLU
         B, 128, 128
     );
     
@@ -223,7 +223,7 @@ float GPUAutoencoder::forward(float* h_input, float* h_output) {
     dim3 grid4(1, 1, B * (256 / 8));
     conv2d_multi_oc_relu<8><<<grid4, block16>>>(
         d_o6, d_w4, d_b4, 
-        d_o7_pre, d_o7,  // ✅ Lưu pre-activation và post-ReLU
+        d_o7_pre, d_o7,  // Lưu pre-activation và post-ReLU
         B, 128, 16, 16, 256
     );
     
@@ -364,9 +364,9 @@ void GPUAutoencoder::backward() {
     //    Forward: conv2d_multi_oc_relu<8> (fused ReLU)
     // ==================================================
     
-    // ✅ ReLU backward với pre-activation
+    // ReLU backward với pre-activation
     relu_backward<<<(B*256*16*16+threads-1)/threads, threads>>>(
-        d_o7_pre,  // ✅ Pre-activation (trước ReLU)
+        d_o7_pre,  // Pre-activation (trước ReLU)
         d_o7,      // Gradient từ upsample backward
         d_o7,      // Output gradient (overwrite)
         B*256*16*16
@@ -403,9 +403,9 @@ void GPUAutoencoder::backward() {
     //    Forward: conv2d_8x8_multi_oc_relu<8> (fused ReLU)
     // ==================================================
     
-    // ✅ ReLU backward với pre-activation
+    // ReLU backward với pre-activation
     relu_backward<<<(B*128*8*8+threads-1)/threads, threads>>>(
-        d_o5_pre,  // ✅ Pre-activation (trước ReLU)
+        d_o5_pre,  // Pre-activation (trước ReLU)
         d_o5,      // Gradient từ upsample backward
         d_o5,      // Output gradient (overwrite)
         B*128*8*8
@@ -442,9 +442,9 @@ void GPUAutoencoder::backward() {
     //    Forward: conv2d_multi_oc_relu<8> (fused ReLU)
     // ==================================================
     
-    // ✅ ReLU backward với pre-activation
+    // ReLU backward với pre-activation
     relu_backward<<<(B*128*16*16+threads-1)/threads, threads>>>(
-        d_o3_pre,  // ✅ Pre-activation (trước ReLU)
+        d_o3_pre,  // Pre-activation (trước ReLU)
         d_o3,      // Gradient từ maxpool backward
         d_o3,      // Output gradient (overwrite)
         B*128*16*16
@@ -481,9 +481,9 @@ void GPUAutoencoder::backward() {
     //     Forward: conv2d_cin3_oc4_relu (specialized Cin=3, fused ReLU)
     // ==================================================
     
-    // ✅ ReLU backward với pre-activation
+    // ReLU backward với pre-activation
     relu_backward<<<(B*256*32*32+threads-1)/threads, threads>>>(
-        d_o1_pre,  // ✅ Pre-activation (trước ReLU)
+        d_o1_pre,  // Pre-activation (trước ReLU)
         d_o1,      // Gradient từ maxpool backward
         d_o1,      // Output gradient (overwrite)
         B*256*32*32

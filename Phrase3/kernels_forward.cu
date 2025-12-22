@@ -188,7 +188,7 @@ __global__ void conv2d_multi_oc_relu(
     const float* __restrict__ input,
     const float* __restrict__ weight,
     const float* __restrict__ bias,
-    float* __restrict__ pre_relu,   // ✅ THÊM: lưu pre-activation
+    float* __restrict__ pre_relu,   // lưu pre-activation
     float* __restrict__ output,
     int B, int Cin, int H, int W, int Cout
 ) {
@@ -273,7 +273,7 @@ __global__ void conv2d_multi_oc_relu(
         }
     }
     
-    // ✅ Write BOTH pre-activation và post-ReLU
+    // Write BOTH pre-activation và post-ReLU
     if (valid) {
         #pragma unroll
         for (int i = 0; i < OC_PER_BLOCK; i++) {
@@ -281,7 +281,7 @@ __global__ void conv2d_multi_oc_relu(
             if (oc < Cout) {
                 float val = sums[i];
                 int idx = ((b * Cout + oc) * H + out_y) * W + out_x;
-                pre_relu[idx] = val;  // ✅ Lưu pre-activation
+                pre_relu[idx] = val;  // Lưu pre-activation
                 output[idx] = (val > 0.0f) ? val : LEAKY_RELU_ALPHA * val;  // ReLU
             }
         }
@@ -394,7 +394,7 @@ __global__ void conv2d_8x8_multi_oc_relu(
     const float* __restrict__ input,
     const float* __restrict__ weight,
     const float* __restrict__ bias,
-    float* __restrict__ pre_relu,   // ✅ THÊM: lưu pre-activation
+    float* __restrict__ pre_relu,   // lưu pre-activation
     float* __restrict__ output,
     int B, int Cin, int Cout
 ) {
@@ -465,14 +465,14 @@ __global__ void conv2d_8x8_multi_oc_relu(
         }
     }
     
-    // ✅ Write BOTH pre-activation và post-ReLU
+    // Write BOTH pre-activation và post-ReLU
     #pragma unroll
     for (int i = 0; i < OC_PER_BLOCK; i++) {
         int oc = oc_base + i;
         if (oc < Cout) {
             float val = sums[i];
             int idx = ((b * Cout + oc) * 8 + ty) * 8 + tx;
-            pre_relu[idx] = val;  // ✅ Lưu pre-activation
+            pre_relu[idx] = val;  //Lưu pre-activation
             output[idx] = (val > 0.0f) ? val : LEAKY_RELU_ALPHA * val;  // ReLU
         }
     }
@@ -487,7 +487,7 @@ __global__ void conv2d_cin3_oc4_relu(
     const float* __restrict__ input,
     const float* __restrict__ weight,
     const float* __restrict__ bias,
-    float* __restrict__ pre_relu,   // ✅ THÊM: lưu pre-activation
+    float* __restrict__ pre_relu,   // lưu pre-activation
     float* __restrict__ output,
     int B, int H, int W, int Cout
 ) {
@@ -612,7 +612,7 @@ __global__ void conv2d_cin3_oc4_relu(
                 }
                 
                 int idx = ((b * Cout + oc) * H + out_y) * W + out_x;
-                pre_relu[idx] = sum;  // ✅ Lưu pre-activation
+                pre_relu[idx] = sum;  // Lưu pre-activation
                 output[idx] = (sum > 0.0f) ? sum : LEAKY_RELU_ALPHA * sum;  // ReLU
             }
         }

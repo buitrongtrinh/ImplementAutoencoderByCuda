@@ -27,7 +27,7 @@ public:
     float *h_w1, *h_w2, *h_w3, *h_w4, *h_w5;
     float *h_b1, *h_b2, *h_b3, *h_b4, *h_b5;
     
-    // ✅ THÊM: Pre-activation buffers cho backward pass
+    // THÊM: Pre-activation buffers cho backward pass
     float *d_o1_pre;   // Pre-ReLU for Conv1
     float *d_o3_pre;   // Pre-ReLU for Conv2
     float *d_o5_pre;   // Pre-ReLU for Conv3

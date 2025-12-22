@@ -28,7 +28,7 @@ __global__ void conv2d_multi_oc_relu(
     const float* __restrict__ input,
     const float* __restrict__ weight,
     const float* __restrict__ bias,
-    float* __restrict__ pre_relu,    // ✅ THÊM
+    float* __restrict__ pre_relu,   
     float* __restrict__ output,
     int B, int Cin, int H, int W, int Cout
 );
@@ -49,7 +49,7 @@ __global__ void conv2d_8x8_multi_oc_relu(
     const float* __restrict__ input,
     const float* __restrict__ weight,
     const float* __restrict__ bias,
-    float* __restrict__ pre_relu,    // ✅ THÊM
+    float* __restrict__ pre_relu, 
     float* __restrict__ output,
     int B, int Cin, int Cout
 );
@@ -59,7 +59,7 @@ __global__ void conv2d_cin3_oc4_relu(
     const float* __restrict__ input,
     const float* __restrict__ weight,
     const float* __restrict__ bias,
-    float* __restrict__ pre_relu,    // ✅ THÊM
+    float* __restrict__ pre_relu,  
     float* __restrict__ output,
     int B, int H, int W, int Cout
 );
