@@ -1,9 +1,0 @@
-========== Epoch 1/1 ==========
-Average Loss: 0.242832
-Epoch Time:  200.089 seconds
-Average Batch Time: 400.165 ms
-Throughput: 4.99778 images/second
-Batch Size: 2
-Num Batches: 500
-==========================================
-

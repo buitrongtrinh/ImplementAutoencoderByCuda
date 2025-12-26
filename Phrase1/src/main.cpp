@@ -8,22 +8,6 @@
 #include "../include/autoencoder.h"
 #include "../include/loss.h"
 
-namespace fs = std::filesystem;
-
-// Hàm tìm thư mục trainX tiếp theo
-std::string createNewTrainFolder() {
-    fs::create_directories("./Phrase1/models");
-
-    int idx = 1;
-    while (true) {
-        std::string folder = "./Phrase1/models/train" + std::to_string(idx);
-        if (!fs::exists(folder)) {
-            fs::create_directories(folder);
-            return folder;
-        }
-        idx++;
-    }
-}
 
 // Hàm ghi baseline performance
 void logBaseline(
@@ -57,18 +41,15 @@ void logBaseline(
 }
 
 void train(int BATCH_SIZE, int EPOCHS, float LEARNING_RATE, int LIMIT, const std::string& LOAD_PATH) {
-
-    // tạo thư mục trainX
-    std::string trainFolder = createNewTrainFolder();
-    std::string weightOutPath = trainFolder + "/weights.bin";
-    std::string reportOutPath = trainFolder + "/baseline.txt";
+    std::string weightOutPath = "/autoencoder_cpu.weights";
+    std::string reportOutPath = "/cpu_training_log.txt";
 
     std::cout << "Saving weights to: " << weightOutPath << std::endl;
     std::cout << "Saving baseline report to: " << reportOutPath << std::endl;
     
     // load dataset
     CIFAR10Dataset dataset;
-    if (!dataset.loadData("./cifar-10-batches-bin")) {
+    if (!dataset.loadData("../cifar-10-batches-bin")) {
         std::cerr << "Failed to load dataset!" << std::endl;
         return;
     }
@@ -171,8 +152,8 @@ void train(int BATCH_SIZE, int EPOCHS, float LEARNING_RATE, int LIMIT, const std
 }
 
 int main(int argc, char* argv[]) {
-    int batch_size = 32;
-    int epochs = 20;
+    int batch_size = 4;
+    int epochs = 1;
     float lr = 0.001f;
     int data_limit = -1;
     std::string load_path = "";
